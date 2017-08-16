@@ -1,0 +1,9 @@
+# OSX
+.DS_Store
+
+# IDE
+.idea/
+.metadata
+*.iml
+.pydevproject
+__pycache__/
