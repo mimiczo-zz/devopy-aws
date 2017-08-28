@@ -37,22 +37,23 @@ def main():
             SEND_MESSAGES.append('  >>>>> Not Found Target EC2 instances')
             return
 
-        for r in result_instances['Reservations'][0]['Instances']:
-            instance_id = r['InstanceId']
-            instance_name = CommonUtils.find_json_kv_query(r['Tags'], 'Name')
-            scheduler_times = CommonUtils.find_json_kv_query(r['Tags'], 'SchedulerTime').split('-')
+        for r in result_instances['Reservations']:
+            target_instance = r['Instances'][0]
+            instance_id = target_instance['InstanceId']
+            instance_name = CommonUtils.find_json_kv_query(target_instance['Tags'], 'Name')
+            scheduler_times = CommonUtils.find_json_kv_query(target_instance['Tags'], 'SchedulerTime').split('-')
 
             start_time = scheduler_times[0]
             end_time = scheduler_times[1]
             is_valid_scheduler_times = DateUtils.is_valid_scheduler_times(start_time, end_time)
 
-            if r['State']['Name'] == 'running' and is_valid_scheduler_times is False:
+            if target_instance['State']['Name'] == 'running' and is_valid_scheduler_times is False:
                 SEND_MESSAGES.append('  >>>>> Instances running time [{}][{}]: {} ~ {}'.format(instance_name, is_valid_scheduler_times, start_time, end_time))
                 SEND_MESSAGES.append('  >>>>> Stopping Target instance(s) [{}]-[{}]'.format(instance_name, instance_id))
                 result_done = boto_client.stop_instances(InstanceIds=[instance_id])
                 if result_done['StoppingInstances'][0]['InstanceId'] == instance_id:
                     SLACK_OPTIONS_PARAMETER['is_send'] = True
-            elif r['State']['Name'] == 'stopped' and is_valid_scheduler_times is True:
+            elif target_instance['State']['Name'] == 'stopped' and is_valid_scheduler_times is True:
                 SEND_MESSAGES.append('  >>>>> Instances running time [{}][{}]: {} ~ {}'.format(instance_name, is_valid_scheduler_times, start_time, end_time))
                 SEND_MESSAGES.append('  >>>>> Starting Target instance(s) [{}]-[{}]'.format(instance_name, instance_id))
                 result_done = boto_client.start_instances(InstanceIds=[instance_id])
