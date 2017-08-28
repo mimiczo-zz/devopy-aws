@@ -142,9 +142,9 @@ class SlackWebHooks:
             return {'username': self.__username, 'attachments': [attachment]}
 
         def build(self):
-            if not self.is_meesage():
+            if not self.is_valid_message():
                 raise Exception('Not found required parameter(url, value)')
             return SlackWebHooks(self)
 
-        def is_meesage(self):
+        def is_valid_message(self):
             return False if not self.__url or not self.__text else True

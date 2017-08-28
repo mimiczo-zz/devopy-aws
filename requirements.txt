@@ -7,3 +7,4 @@ traceback
 requests
 netifaces
 ipaddress
+boto3
