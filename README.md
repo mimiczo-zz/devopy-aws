@@ -42,8 +42,8 @@ Schedule jobs to start and stop instances automatically to save cost.
 ```bash
 $ crontab -l
 
-*/10 * * * * /var/www/schedulers/ec2.py --profile=foo --region=ap-northeast-2 --slack=https://hooks.slack.com/services/xxx/yyy
-*/10 * * * * /var/www/schedulers/rds.py --profile=foo --region=ap-northeast-2 --slack=https://hooks.slack.com/services/xxx/yyy
+*/10 * * * * /home/user/devopy-aws/schedulers/ec2.py --profile=foo --region=ap-northeast-2 --slack=https://hooks.slack.com/services/xxx/yyy
+*/10 * * * * /home/user/devopy-aws/schedulers/rds.py --profile=foo --region=ap-northeast-2 --slack=https://hooks.slack.com/services/xxx/yyy
 ```
 
 ## 1. EC2
