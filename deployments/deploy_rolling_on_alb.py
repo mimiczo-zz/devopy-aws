@@ -6,8 +6,11 @@ import argparse
 import time
 import datetime
 import traceback
-from utils import ScriptUtils
-from slack_webhook import SlackWebHooks
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+from commons.utils import ScriptUtils
+from commons.slack_webhook import SlackWebHooks
 
 SENDMAIL_MESSAGES = []
 AWS_HEALTHCHECK_COMMAND = 'aws elbv2 describe-target-health --target-group-arn {} --targets Id={},Port={} --query "TargetHealthDescriptions[].TargetHealth.State" --output text --region={region} --profile={profile}'

@@ -1,10 +1,83 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Created by j on 2017. 8. 16..
+# Created by j on 2017. 8. 14..
+import argparse
+import datetime
 import json
 import subprocess
 import re
+from commons.slack_webhook import SlackWebHooks
+
+
+class CommonUtils:
+    @staticmethod
+    def init_argument():
+        """
+        Usage : ./foobar.py --profile=foo --region=ap-northeast-2 --slack=https://..../xxx/yyy/zzz
+        :return: 
+        """
+        parser = argparse.ArgumentParser(description='Foobar Instances Scheduler arguments')
+        parser.add_argument('--region', metavar='target_region_name', required=False, default='ap-northeast-2')
+        parser.add_argument('--profile', metavar='aws_profiles', required=False, default='besty')
+        parser.add_argument('--slack', metavar='slack_webhooks_key', required=False)
+        parser.add_argument('--pem', metavar='pemfile path', required=False, default=None)
+        args = parser.parse_args()
+
+        SlackWebHooks.init_slack(args.slack)
+        argument = {
+            'aws_profile': args.profile,
+            'aws_region': args.region,
+            'slack_webhook_key': args.slack
+        }
+        if args.pem is not None:
+            argument['pem'] = args.pem
+
+        return argument
+
+    @staticmethod
+    def find_json_kv_query(data, name):
+        val = None
+
+        for d in data:
+            if d['Key'] == name:
+                val = d['Value']
+                break
+
+        return val
+
+
+class DateUtils:
+    @staticmethod
+    def is_today_in_weekdays():
+        current_week_day = datetime.datetime.now().strftime('%a').lower()
+        # running days
+        weekdays = ['mon', 'tue', 'wed', 'thu', 'fri']
+        if current_week_day in weekdays:
+            return True
+        return False
+
+    @staticmethod
+    def is_valid_scheduler_times(start_time, end_time):
+        """
+        :param start_time: 09:00 
+        :param end_time: 18:00
+        :return: 
+        """
+        # 현재 H:m 체크
+        now_date = datetime.datetime.now()
+        start_date = DateUtils.hm_to_date_time(start_time)
+        stop_date = DateUtils.hm_to_date_time(end_time)
+        # 현재 상태체크
+        return start_date <= now_date <= stop_date
+
+    @staticmethod
+    def hm_to_date_time(hm):
+        cur = datetime.datetime.now()
+        hour = hm.split(':')[0]
+        minute = hm.split(':')[1]
+        date_time = cur.replace(hour=int(hour), minute=int(minute), second=0, microsecond=0)
+        return date_time
 
 
 class ScriptUtils:
@@ -68,7 +141,8 @@ class ScriptUtils:
         :param is_json:
         :return: Run AWS CLI result
         """
-        result, error = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()
+        result, error = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                         shell=True).communicate()
         if error:
             print(error)
 
